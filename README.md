@@ -1,0 +1,1 @@
+# Malaria-Parasite-Detection-from-Thin-Blood-Cell-Film-Using-Convolutional-Neural-Network-sing-Matlab
