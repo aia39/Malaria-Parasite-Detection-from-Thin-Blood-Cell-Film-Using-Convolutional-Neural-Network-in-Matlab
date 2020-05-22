@@ -1,0 +1,93 @@
+clc
+clear all
+
+categories={'Parasitized','Uninfected'};
+root_folder='cell_images\train';
+imds=imageDatastore(fullfile(root_folder,categories),'LabelSource','foldernames' );
+[imdsTrain,imdsValidation] = splitEachLabel(imds,0.7);
+
+net=densenet201;
+%inputSize = net.Layers(1).InputSize;
+
+% if isa(net,'SeriesNetwork') 
+%   lgraph = layerGraph(net.Layers); 
+% else
+%   lgraph = layerGraph(net);
+% end 
+%layers0=lgraph.Layers
+%[learnableLayer,classLayer] = findLayersToReplace(lgraph);
+%[learnableLayer,classLayer] 
+
+numClasses = 2;
+
+lgraph = layerGraph(net);
+inputSize = net.Layers(1).InputSize;
+newFCLayer = fullyConnectedLayer(numClasses,'Name','new_fc','WeightLearnRateFactor',10,'BiasLearnRateFactor',10);
+lgraph = replaceLayer(lgraph,'fc1000',newFCLayer);
+
+newClassLayer = classificationLayer('Name','new_classoutput');
+lgraph = replaceLayer(lgraph,'ClassificationLayer_predictions',newClassLayer);
+
+augimdsTrain = augmentedImageDatastore(inputSize(1:2),imdsTrain);
+augimdsValidation = augmentedImageDatastore(inputSize(1:2),imdsValidation);
+
+options = trainingOptions('sgdm', ...
+    'MiniBatchSize',10, ...
+    'MaxEpochs',8, ...
+    'InitialLearnRate',1e-4, ...
+    'Shuffle','every-epoch', ...
+    'ValidationData',augimdsValidation, ...
+    'ValidationFrequency',5, ...
+    'Verbose',false, ...
+    'Plots','training-progress');
+
+trainedNet = trainNetwork(augimdsTrain,lgraph,options);
+%numel(categories(imdsTrain.Labels));
+
+% if isa(learnableLayer,'nnet.cnn.layer.FullyConnectedLayer')
+%     newLearnableLayer = fullyConnectedLayer(numClasses, ...
+%         'Name','new_fc', ...
+%         'WeightLearnRateFactor',10, ...
+%         'BiasLearnRateFactor',10);
+%     
+% elseif isa(learnableLayer,'nnet.cnn.layer.Convolution2DLayer')
+%     newLearnableLayer = convolution2dLayer(1,numClasses, ...
+%         'Name','new_conv', ...
+%         'WeightLearnRateFactor',10, ...
+%         'BiasLearnRateFactor',10);
+% end
+% lgraph = replaceLayer(lgraph,learnableLayer.Name,newLearnableLayer);
+% 
+% layers = lgraph.Layers;
+% connections = lgraph.Connections;
+
+% layers(1:10) = freezeWeights(layers(1:10));
+% lgraph = createLgraphUsingConnections(layers,connections);
+% 
+% pixelRange = [-30 30];
+% scaleRange = [0.9 1.1];
+% imageAugmenter = imageDataAugmenter( ...
+%     'RandXReflection',true, ...
+%     'RandXTranslation',pixelRange, ...
+%     'RandYTranslation',pixelRange, ...
+%     'RandXScale',scaleRange, ...
+%     'RandYScale',scaleRange);
+% augimdsTrain = augmentedImageDatastore(inputSize(1:2),imdsTrain, ...
+%     'DataAugmentation',imageAugmenter);
+% 
+% augimdsValidation = augmentedImageDatastore(inputSize(1:2),imdsValidation);
+% 
+% miniBatchSize = 10;
+% valFrequency = floor(numel(augimdsTrain.Files)/miniBatchSize);
+% options = trainingOptions('sgdm', ...
+%     'MiniBatchSize',miniBatchSize, ...
+%     'MaxEpochs',6, ...
+%     'InitialLearnRate',3e-4, ...
+%     'Shuffle','every-epoch', ...
+%     'ValidationData',augimdsValidation, ...
+%     'ValidationFrequency',valFrequency, ...
+%     'Verbose',false, ...
+%     'Plots','training-progress');
+% 
+% convnet = trainNetwork(augimdsTrain,lgraph,options);
+
