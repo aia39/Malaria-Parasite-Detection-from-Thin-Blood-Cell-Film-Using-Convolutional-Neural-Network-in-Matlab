@@ -6,29 +6,35 @@ Widely used matlab is also another option to apply deep learning framework besid
 # Dataset 
 Dataset of thin blood cell film can be downloaded from [NIH](https://lhncbc.nlm.nih.gov/publication/pub9932) website or [Kaggle](https://www.kaggle.com/iarunava/cell-images-for-detecting-malaria)
 
-After downloading dataset it should be organized like 
+After downloading dataset it should be organized like : 
 
-cell_images\
-|
-|
----train\
-        |
-        |
-        --Parasitized\
-            * .jpg
-            ..
-        --Uninfected\
-            * .jpg
-            ..
----valid\
-        |
-        |
-        --Parasitized\
-            * .jpg
-            ..
-        --Uninfected\
-            * .jpg
-            ..
+```
+cell_images/
+    train/
+      Parasitized/
+        0001.jpg
+        0002.jpg
+
+        ...
+      Uninfected/
+        0001.jpg
+        0002.jpg
+        
+	...
+
+    valid/
+      Parasitized/
+        0001.jpg
+        0002.jpg
+
+        ...
+      Uninfected/
+        0001.jpg
+        0002.jpg
+        
+	...
+```
+
 
 # Getting Started 
 
